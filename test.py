@@ -81,5 +81,19 @@ display.show()
 ####################################################################
 # test PIR
 
-#cpprint('*** Testing display... ***')
+print('*** Testing PIR... ***')
 
+import time
+
+pir_pin = machine.Pin(14, machine.Pin.IN)
+old_value = pir_pin.value()
+
+while 1:
+    if pir_pin.value():
+        if not old_value:
+            print('Motion detected...')
+    else:
+        if old_value:
+            print('...Motion ended!')
+    old_value = pir_pin.value()
+    time.sleep_ms(100)
