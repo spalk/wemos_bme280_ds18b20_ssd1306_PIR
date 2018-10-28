@@ -83,8 +83,6 @@ display.show()
 
 print('*** Testing PIR... ***')
 
-import time
-
 pir_pin = machine.Pin(14, machine.Pin.IN)
 old_value = pir_pin.value()
 
