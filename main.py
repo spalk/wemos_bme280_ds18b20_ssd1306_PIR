@@ -21,7 +21,7 @@ tmr_ds = 60
 tmr_ds_last = 0
 tmr_mqtt = 60      # data sendint frequency
 tmr_mqtt_last = 0
-tmr_display_off = 10
+tmr_display_off = 20
 tmr_display_off_last = 0
 
 # I2C Init
@@ -99,8 +99,10 @@ def read_ds(rom):
 
 def oled_on (display):
     display.fill(0)
-    display.text('T inside: %s' % BME_T, 10, 0, 1)
-    display.text('T outside: %s' % DS_T, 10, 15, 1)
+    display.text('T in:%s' % '{:.0f}'.format(BME_T), 0, 4, 1)
+    display.text('out:%s' % '{:.0f}'.format(DS_T), 70, 4, 1)
+    display.text('P:%smm' % '{:.0f}'.format(BME_P), 0, 24, 1)
+    display.text('H:%s' % '{:.0f}'.format(BME_H) + '%', 72, 24, 1)
     print('Display ON')
     display.show()
 
@@ -133,7 +135,12 @@ time.sleep_ms(750)
 
 print('OLED init')
 display = ssd1306.SSD1306_I2C(128, 32, i2c)
-display.contrast(20)
+display.contrast(0)
+
+tmr_bme_last = time.time() - tmr_bme
+tmr_ds_last = time.time() - tmr_ds
+tmr_display_off_last = time.time() - tmr_display_off
+tmr_mqtt_last = time.time() - tmr_mqtt
 
 while True:
     check_motion()
