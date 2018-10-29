@@ -5,10 +5,11 @@ import bme280
 import ds18x20, onewire
 import ssd1306
 
+from umqtt.simple import MQTTClient
+
 
 # Global values:
 MOTION = False     # motrion detection
-DISPLAY = 0        # display on|off
 BME_T = 0          # 
 BME_P = 0          # BME280 data
 BME_H = 0          #
@@ -117,10 +118,33 @@ def oled_off(display):
         print('Display timer pass')
 
 
-
 #############################################
 #  MQTT                                     #
 #############################################
+# get brocker account info from config
+brkf = open('brocker.conf').readlines()
+brocker = {}
+brocker['server']   = brkf[0].replace('\n','')
+brocker['user']     = brkf[1].replace('\n','')
+brocker['password'] = brkf[2].replace('\n','')
+
+print('MQTT init')
+client = MQTTClient('wemos-d1-mini-001', 
+                    server=brocker['server'], 
+                    user=brocker['user'], 
+                    password=brocker['password'])
+client.connect()
+
+def mqtt_send():
+    global tmr_mqtt_last
+    if time.time() - tmr_mqtt_last > tmr_mqtt:
+        print('Sending data via mqtt...')
+        client.publish('house/kitchen/temp', str('{:.2f}'.format(BME_T)))
+        client.publish('house/kitchen/humid', str('{:.1f}'.format(BME_H)))
+        client.publish('house/outside/temp', str('{:.2f}'.format(DS_T)))
+        tmr_mqtt_last = time.time()
+    else:
+        print('MQTT timer pass')
 
 
 
@@ -136,7 +160,7 @@ time.sleep_ms(750)
 print('OLED init')
 display = ssd1306.SSD1306_I2C(128, 32, i2c)
 display.contrast(0)
-
+ 
 tmr_bme_last = time.time() - tmr_bme
 tmr_ds_last = time.time() - tmr_ds
 tmr_display_off_last = time.time() - tmr_display_off
@@ -146,6 +170,7 @@ while True:
     check_motion()
     read_bme(bme)
     read_ds(roms[0])
+    mqtt_send()
     if MOTION: 
         oled_on(display)
     else:
