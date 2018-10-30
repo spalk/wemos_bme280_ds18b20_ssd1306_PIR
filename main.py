@@ -132,7 +132,7 @@ brocker['user']     = brkf[1].replace('\n','')
 brocker['password'] = brkf[2].replace('\n','')
 
 print('MQTT init')
-client = MQTTClient('wemos-d1-mini-001', 
+client = MQTTClient('wemos-d1-mini-002', 
                     server=brocker['server'], 
                     user=brocker['user'], 
                     password=brocker['password'])
