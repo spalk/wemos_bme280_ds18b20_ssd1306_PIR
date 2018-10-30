@@ -81,12 +81,15 @@ def read_bme(bme):
 print('One Wire init')
 oneWire_pin = machine.Pin(2)
 
-def read_ds(rom):
+def read_ds(ds):
     global DS_T
     global tmr_ds_last
     if time.time() - tmr_ds_last > tmr_ds:
         print('DS18X20 reading data')
-        DS_T = ds.read_temp(rom)
+        roms =  ds.scan()
+        ds.convert_temp()
+        time.sleep_ms(750)
+        DS_T = ds.read_temp(roms[0])
         print(DS_T)
         tmr_ds_last = time.time()
     else:
@@ -153,9 +156,6 @@ bme = bme280.BME280(i2c=i2c,address=addrBME280)
 
 print('DS18X20 init')
 ds = ds18x20.DS18X20(onewire.OneWire(oneWire_pin))
-roms =  ds.scan()
-ds.convert_temp()
-time.sleep_ms(750)
 
 print('OLED init')
 display = ssd1306.SSD1306_I2C(128, 32, i2c)
@@ -169,7 +169,7 @@ tmr_mqtt_last = time.time() - tmr_mqtt
 while True:
     check_motion()
     read_bme(bme)
-    read_ds(roms[0])
+    read_ds(ds)
     mqtt_send()
     if MOTION: 
         oled_on(display)
